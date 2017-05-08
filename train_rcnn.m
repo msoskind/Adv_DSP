@@ -36,35 +36,54 @@ table_i = table(imageFilenames, irises);
 convLayer = convolution2dLayer(5,10,'Padding',2,'BiasLearnRateFactor',2);
 convLayer.Weights = randn([5 5 3 10])*0.0001;
 convLayer.Bias = randn([1 1 10])*0.00001+1;
-
-layers = [
+% output = classificationLayer('Name','coutput');
+% output.ClassNames = cellstr(['p ';'np']);
+objectClasses = {'purpil'};
+numClassesPlusBackground = numel(objectClasses) + 1;
+layers1 = [ 
     imageInputLayer([250 250 3])
-    convLayer   % convLayer defined above
+    
+    convolution2dLayer(5,64)   % convLayer defined above
     reluLayer()
-    fullyConnectedLayer(10)
+    convolution2dLayer(5,64)   % convLayer defined above
+    reluLayer()
+    maxPooling2dLayer(2,'Stride',2)
+    
+    convolution2dLayer(3,32)
+    reluLayer()
+    convolution2dLayer(3,32)
+    maxPooling2dLayer(2,'Stride',2)
+    
+    fullyConnectedLayer(numClassesPlusBackground)
     softmaxLayer()
     classificationLayer()
 ];
-
+% load('rcnnStopSigns.mat', 'stopSigns', 'layers')
+% myLayers = [
+%     imageInputLayer([250,250,3])
+%     layers(2:end)
+%     ];
 %%
 % Set network training options to use mini-batch size of 32 to reduce GPU
 % memory usage. Lower the InitialLearningRate to reduce the rate at which
 % network parameters are changed. This is beneficial when fine-tuning a
 % pre-trained network and prevents the network from changing too rapidly. 
 options = trainingOptions('sgdm', ...
-  'MiniBatchSize', 32, ...
+  'MiniBatchSize', 16, ...
   'InitialLearnRate', 1e-6, ...
   'MaxEpochs', 10);
 
 %%
 % Train the R-CNN detector. Training can take a few minutes to complete.
-rcnn_p = trainRCNNObjectDetector(table_p, layers, options, 'NegativeOverlapRange', [0 0.3]);
+rcnn_p = trainRCNNObjectDetector(table_p, layers1, options, 'NegativeOverlapRange', [0 0.3]);
 
 %%
 % Test the R-CNN detector on a test image.
 img = imread('test_eye.jpg'); 
+% img = imread('eye_01.jpg');
+img_diff = imresize(img, [250 250]);
 
-[bbox, score, label] = detect(rcnn_p, img, 'MiniBatchSize', 32);
+[bbox, score, label] = detect(rcnn_p, img, 'MiniBatchSize', 16);
 %%
 % Display strongest detection result.
 [score, idx] = max(score);
