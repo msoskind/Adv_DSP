@@ -8,7 +8,7 @@
 clear pupils irises; clc;
 
 % Creating a fileID for the metadata
-filename = 'metadata_2.txt';
+filename = 'metadata.txt';
 fileID = fopen(filename);
 
 % Reading in metadata from the text file
@@ -76,6 +76,3 @@ detectedImg = insertObjectAnnotation(img, 'rectangle', bbox, annotation);
 
 figure();
 imshow(detectedImg)
-%%
-% Remove the image directory from the path.
-rmpath(imDir); 
