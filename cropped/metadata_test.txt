@@ -1,0 +1,2 @@
+filename	p_cent_x	p_cent_y	 p_rad	i_cent_x	i_cent_y	 i_rad
+test_eye.jpg	119.44	127.52	 23.95	122.28	132.51	 78.58
